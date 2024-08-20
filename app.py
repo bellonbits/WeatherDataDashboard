@@ -13,8 +13,8 @@ df.set_index('Date/Time', inplace=True)
 # Create sidebar for navigation
 st.sidebar.title("Weather Data Analysis")
 option = st.sidebar.selectbox("Select Section", 
-                              ["Data Overview", "Statistical Summary", "Time Series Analysis", 
-                               "Correlation Analysis", "Seasonal Trends", "Anomalies", "Insights & Recommendations"])
+                                 ["Data Overview", "Statistical Summary", "Time Series Analysis", 
+                                  "Correlation Analysis", "Seasonal Trends", "Anomalies", "Insights & Recommendations"])
 
 # Data Overview
 if option == "Data Overview":
@@ -43,7 +43,7 @@ elif option == "Time Series Analysis":
     
     # Humidity over time
     plt.figure(figsize=(10, 6))
-    plt.plot(df.index, df['Rel_Hum_%'], marker='o', linestyle='-', color='g')
+    plt.plot(df.index, df['Rel Hum_%'], marker='o', linestyle='-', color='g')
     plt.title('Humidity Over Time')
     plt.xlabel('Date/Time')
     plt.ylabel('Relative Humidity (%)')
@@ -51,7 +51,7 @@ elif option == "Time Series Analysis":
     
     # Wind Speed over time
     plt.figure(figsize=(10, 6))
-    plt.plot(df.index, df['Wind_Speed_km/h'], marker='o', linestyle='-', color='r')
+    plt.plot(df.index, df['Wind Speed_km/h'], marker='o', linestyle='-', color='r')
     plt.title('Wind Speed Over Time')
     plt.xlabel('Date/Time')
     plt.ylabel('Wind Speed (km/h)')
@@ -63,7 +63,7 @@ elif option == "Correlation Analysis":
     
     # Correlation Matrix
     plt.figure(figsize=(10, 8))
-    corr = df[['Temp_C', 'Dew_Point_Temp_C', 'Rel_Hum_%', 'Wind_Speed_km/h', 'Visibility_km', 'Press_kPa']].corr()
+    corr = df[['Temp_C', 'Dew Point Temp_C', 'Rel Hum_%', 'Wind Speed_km/h', 'Visibility_km', 'Press_kPa']].corr()
     sns.heatmap(corr, annot=True, cmap='coolwarm')
     plt.title('Correlation Matrix')
     st.pyplot(plt)
@@ -71,6 +71,15 @@ elif option == "Correlation Analysis":
 # Seasonal Trends
 elif option == "Seasonal Trends":
     st.title("Seasonal Trends")
+    
+    # Extract month and season from the index if not already present
+    df['Month'] = df.index.month
+    df['Season'] = df.index.month.map({
+        12: 'Winter', 1: 'Winter', 2: 'Winter',
+        3: 'Spring', 4: 'Spring', 5: 'Spring',
+        6: 'Summer', 7: 'Summer', 8: 'Summer',
+        9: 'Fall', 10: 'Fall', 11: 'Fall'
+    })
     
     # Plot seasonal temperature
     plt.figure(figsize=(10, 6))
@@ -82,7 +91,7 @@ elif option == "Seasonal Trends":
     
     # Plot seasonal humidity
     plt.figure(figsize=(10, 6))
-    sns.boxplot(x='Season', y='Rel_Hum_%', data=df)
+    sns.boxplot(x='Season', y='Rel Hum_%', data=df)
     plt.title('Humidity by Season')
     plt.xlabel('Season')
     plt.ylabel('Relative Humidity (%)')
@@ -92,7 +101,13 @@ elif option == "Seasonal Trends":
 elif option == "Anomalies":
     st.title("Investigate Anomalies")
     
-    # Temperature Outliers
+    # Detect temperature outliers
+    Q1 = df['Temp_C'].quantile(0.25)
+    Q3 = df['Temp_C'].quantile(0.75)
+    IQR = Q3 - Q1
+    df['Temp_Outliers'] = ((df['Temp_C'] < (Q1 - 1.5 * IQR)) | (df['Temp_C'] > (Q3 + 1.5 * IQR)))
+    
+    # Plot temperature outliers
     plt.figure(figsize=(10, 6))
     sns.boxplot(x='Temp_Outliers', y='Temp_C', data=df)
     plt.title('Temperature Outliers')
